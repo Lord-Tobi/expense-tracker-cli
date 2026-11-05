@@ -1,107 +1,140 @@
+import sys
+
 expenses = []
-print("\n =====  EXPENSE TRACKER  =====")
-while True:
-    print("=====  =====")
-    print("\nMenu:")
-    print("\n1. Add Expense")
-    print("\n2. View All Expenses")
-    print("\n3. View Summary")
-    print("\n4. Quit")
-    print("\n=====  ======")
-    choice_options = ["1", "2", "3", "4"]
-    user_input = input("\nEnter a choice: ").strip()
-    #To quit:
-    if not user_input:
-        print("\nEnter a valid choice")
-    elif user_input == "4":
-        print("\nGoodbye!!!")
+
+
+def add_expense():
+    while True:
+        description = input("Description: ").strip().capitalize()
+        if description:
+            break
+        print("Description cannot be empty. Please try again ")
+
+    while True:      
+        category = input("Category: ").strip().title()
+
+        if category:
+            break
+        print("Category cannot be empty. Please try again")
+
+    while True:
+        try:
+            amount = float(input("Amount: "))
+            if amount <= 0:
+                print("Amount must be a positive number.")
+                continue
+
+        except ValueError:
+            print("Invalid amount. Please enter a number.")
+            continue
         break
-    elif user_input not in choice_options:
-        print("\nEnter a valid choice as stated in the menu above.")
-    elif user_input in choice_options:
-        if user_input == "1":
-            print("\nAdding Expense...")
-        expense = {}
+            
+                
 
-        description = input("Enter Description: ").capitalize().strip()
-        if not description:
-            print("Enter a description")
+    expense = {
+        "description": description,
+        "category": category,
+        "amount": amount
+    }
+
+    expenses.append(expense)
+    print("Expense added successfully!")
+
+
+def view_expenses():
+    if not expenses:
+        print("No expenses recorded yet.")
+        return
+
+    print('\n' + '=' * 66)
+    print('All Expenses'.center(66))
+    print('=' * 66)
+
+    print(f"{"S/n":^6} | {"Description":^20} | {"Category":^15} | {"Amount":^10}(₦)")
+
+    for index, expense in enumerate(expenses, 1):
+        print(f"{index:^6} | {expense['description']:<20} | {expense['category']:<15} |{expense['amount']:>10.2f}")
+
+    print('=' * 66)
+
+
+def view_summary():
+    if not expenses:
+        print("No expenses available to summarize.")
+        return
+
+    total = 0
+    category_totals = {}
+
+    for expense in expenses:
+        amount = expense["amount"]
+        category = expense["category"]
+        
+        total += amount
+      
+        if category in category_totals:
+            category_totals[category] += amount
+        else:
+            category_totals[category] = amount
+
+    
+    max_expense = max(expense["amount"] for expense in expenses)
+    top_expenses = [expense for expense in expenses if expense["amount"] == max_expense]
+
+    print("\n===== Expense Summary =====")
+    print(f"Total spent: ₦ {total:.2f}")
+
+    print("\nSpending by category:")
+
+    for category, amount in category_totals.items():
+        print(f"{category}: ₦ {amount:.2f}\n")
+
+    
+    print("===== Most Expensive Expense =====")
+    print(f"{"S/n":^6} | {"Category":^15} | {"Description":^20} | {"Amount":^10}(₦)")
+
+    for index, most_expensive in enumerate(top_expenses, 1):
+        print(f"{index:^6} | {most_expensive['category']:<15} | {most_expensive['description']:<20} |{most_expensive['amount']:>10.2f}")
+
+
+def main():
+    while True:
+        print("""
+===== Expense Tracker =====
+1. Add expense
+2. View expenses
+3. View summary
+4. Quit
+===========================
+""")
+       
+        choice = input("Choose an option: ").strip()
+
+        if not choice:
+            print("Choice can't be empty")
             continue
 
-        category = input("Enter Category: ").title().strip()
-        if not category:
-            print("Enter a category")
-            continue
+        if choice == "1":
+            add_expense()
 
-        while True:
-            try:
-                amount = float(input("Enter amount spent: "))
+        elif choice == "2":
+            view_expenses()
 
-                if amount <= 0:
-                    print("Invalid amount. Please enter a number greater than zero.")
-                    continue
-                break
-            
-            except ValueError:
-                print("Please enter a valid number.")
+        elif choice == "3":
+            view_summary()
 
-        expense['description'] = description
-        expense['category'] = category
-        expense['amount'] = amount
+        elif choice == "4":
+            print("Thank you for using the Expense Tracker!")
+            sys.exit(0)
 
-        expenses.append(expense)
-        print("Expense added successfully!")
-
-        if len(expenses) == 1:
-            print(
-                f"\nExpense:"
-                f"\nDescription: {expense['description']}"
-                f"\nCategory: {expense['category']}"
-                f"\nAmount: {expense['amount']:.2f}"
-            )
-
-        elif user_input == "2":
-            print("Viewing all expense...")
-            print("----- EXPENSES -----")
-            if not expenses:
-                print("No expenses recorded yet.")
-            else:
-                for exp in expenses:
-                    print(f"\nDescription: {exp['description']}\nCategory: {exp['category']}\nAmount: {exp['amount']:.2f}")
-                print("\nAll expenses displayed.")
-        elif user_input == "3":
-            print("\nViewing Summary...")
-            if not expenses:
-                print("No expenses recorded yet.")
-            else:
-                # Calculate and display the summary here
-                total = 0
-                for e in expenses:
-                    total += e['amount']
-                print(f"\nTotal amount spent: {total:.2f}")
-            
-                print("\n----- CATEGORY SUMMARY -----")
-                category_total = {}
-
-                for expense in expenses:
-                    if expense['category'] not in category_total:
-                        category_total[expense['category']] = expense['amount']
-                    else:
-                        category_total[expense['category']] += expense['amount']
-                for category in category_total:
-                    print(f"\n{category}: {category_total[category]:.2f}")
-                    
-                most_expensive = expenses[0]
-                for exp in expenses:
-                    if exp['amount'] > most_expensive['amount']:
-                        most_expensive = exp
-                print(
-                        f"\nMost expensive expense: "
-                        f"{most_expensive['description']} - "
-                        f"{most_expensive['category']} - "
-                        f"{most_expensive['amount']:.2f}"
-                    )
-                print("\nSummary displayed successfully.")
+        else:
+            print("Invalid choice. Please choose 1, 2, 3, or 4.")
 
 
-# Requirements
+main()
+
+
+
+#Category: food; Description: lunch; amt: 2000
+#: rent; : house rent; : 4500000
+#: fashion; : shoes; : 30000
